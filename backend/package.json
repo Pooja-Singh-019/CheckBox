@@ -1,0 +1,19 @@
+{
+  "name": "one-million-box-realtime",
+  "version": "1.0.0",
+  "description": "Realtime checkbox grid with Node, Express, WebSocket, Redis and custom auth/rate-limits.",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.mjs",
+    "dev": "node --watch server/index.mjs"
+  }, 
+  "dependencies": {
+    "express": "^4.21.2",
+    "jose": "^6.2.2",
+    "pg": "^8.20.0",
+    "redis": "^5.8.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
+    "ws": "^8.18.3"
+  }
+}

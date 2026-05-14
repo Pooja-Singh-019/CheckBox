@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find the Hunter</title>
+    <meta name="description" content="Multiplayer Bunny World game: find the hunter, save the bunnies.">
+    <link rel="stylesheet" href="./OneMillionBox.css">
+  </head>
+<body>
+  <div id="authGate" class="auth-gate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <section class="auth-card">
+      <div class="auth-mascots" aria-hidden="true">
+        <img src="./bunny.png" alt="" class="auth-mascot bunny-mascot">
+        <div class="auth-paws">* * *</div>
+        <img src="./Hunter.png" alt="" class="auth-mascot hunter-mascot">
+      </div>
+
+      
+      <p class="auth-kicker">Bunny World Checkpoint</p>
+      <h2 id="authTitle" class="auth-title">Welcome Back, Guardian</h2>
+      <p id="authSubtitle" class="auth-subtitle">Login to continue your bunny rescue mission.</p>
+
+      <div class="auth-tabs" role="tablist" aria-label="Authentication" data-mode="login">
+        <button id="loginTab" class="auth-tab is-active" type="button" role="tab" aria-selected="true">Login</button>
+        <button id="signupTab" class="auth-tab" type="button" role="tab" aria-selected="false">Sign Up</button>
+      </div>
+
+      <form id="loginForm" class="auth-form" novalidate>
+        <label class="auth-label" for="loginEmail">Email</label>
+        <input id="loginEmail" name="email" class="auth-input" type="email" autocomplete="email" required>
+
+        <label class="auth-label" for="loginPassword">Password</label>
+        <input id="loginPassword" name="password" class="auth-input" type="password" autocomplete="current-password" required>
+
+        <label class="auth-check">
+          <input id="rememberMe" type="checkbox" name="remember">
+          <span>Keep me logged in</span>
+        </label>
+
+        <button type="submit" class="auth-button">Log In</button>
+      </form>
+
+      <form id="signupForm" class="auth-form is-hidden" novalidate>
+        <div class="auth-block">
+          <label class="auth-label" for="signupName">Full Name</label>
+          <input id="signupName" name="name" class="auth-input" type="text" autocomplete="name" required>
+        </div>
+
+        <div class="auth-block">
+          <label class="auth-label" for="signupEmail">Email</label>
+          <input id="signupEmail" name="email" class="auth-input" type="email" autocomplete="email" maxlength="254" required>
+          <label class="auth-label" for="signupPassword">Password</label>
+          <input id="signupPassword" name="password" class="auth-input" type="password" autocomplete="new-password" required>
+
+          <label class="auth-label" for="signupConfirmPassword">Confirm Password</label>
+          <input id="signupConfirmPassword" name="confirmPassword" class="auth-input" type="password" autocomplete="new-password" required>
+        </div>
+
+        <button type="submit" class="auth-button">Create Account</button>
+      </form>
+
+      <p id="authMessage" class="auth-message" aria-live="polite"></p>    </section>
+  </div>
+
+
+
+  <main class="game-shell is-hidden" id="gameShell">
+    <header class="hero">
+      <div class="hero-topbar">
+        <p id="welcomeText" class="welcome-text">Welcome</p>
+        <div class="hero-actions">
+          <p id="presenceText" class="presence-text">Players online: 1</p>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to light mode">
+            <span class="theme-toggle-icon" aria-hidden="true">&#9728;</span>
+          </button>
+          <button id="logoutBtn" type="button" class="logout-btn">Logout</button>
+        </div>
+      </div>
+
+      <h1 class="hero-title">
+        <span>FIND THE HUNTER <img src="./Hunter.png" alt="Hunter icon" class="hunter-img"></span>
+        <span>AND SAVE THE BUNNIES <img src="./bunny.png" alt="Bunny icon" class="bunny-img"></span>
+      </h1>
+      <p class="hero-subtitle">Open the boxes one by one. Spot the hunter to protect Bunny World.</p>
+    </header>
+
+    <div class="headline-line"></div>
+
+    <section class="board-panel">
+      <div id="bunnyGrid" aria-label="Bunny reveal grid"></div>
+    </section>
+  </main>
+
+  <script>
+    // Set these after backend deployment (Render/Railway/etc).
+    // Example:
+    // window.ONEBOX_API_BASE_URL = "https://your-service.onrender.com";
+    // window.ONEBOX_WS_BASE_URL = "wss://your-service.onrender.com";
+    window.ONEBOX_API_BASE_URL = "";
+    window.ONEBOX_WS_BASE_URL = "";
+  </script>
+  <script src="./OneMillionBox.js"></script>
+</body>
+</html>
+

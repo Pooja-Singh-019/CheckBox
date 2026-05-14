@@ -1,0 +1,11 @@
+node_modules/
+.netlify/
+.vscode/
+.env
+*.log
+data/*.sqlite
+data/*.db
+backend/data/*.sqlite
+backend/data/*.db
+.DS_Store
+Thumbs.db

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneMillionBox Admin</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #647089;
+      --line: #dbe3f0;
+      --panel: #ffffff;
+      --page: #f4f7fb;
+      --accent: #1677b9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      background: var(--page);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    main {
+      width: min(920px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    h1,
+    p {
+      margin: 0;
+    }
+
+    .toolbar,
+    .stat,
+    .user-row {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      box-shadow: 0 10px 24px rgba(28, 41, 74, 0.08);
+    }
+
+    .toolbar {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+    }
+
+    input,
+    button {
+      height: 42px;
+      border-radius: 9px;
+      font: inherit;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #cbd6e8;
+      padding: 0 12px;
+    }
+
+    button {
+      border: 0;
+      padding: 0 18px;
+      color: #ffffff;
+      background: var(--accent);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px 16px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 1.45rem;
+    }
+
+    .users {
+      display: grid;
+      gap: 10px;
+    }
+
+    .user-row {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .user-index {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #e7f3ff;
+      color: #155e9f;
+      font-weight: 900;
+    }
+
+    .user-details {
+      display: grid;
+      gap: 4px;
+    }
+
+    .user-details span {
+      color: #34405c;
+    }
+
+    .user-details small {
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .message {
+      color: #b4233c;
+      font-weight: 700;
+    }
+
+    @media (max-width: 680px) {
+      body {
+        padding: 14px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Admin Panel</h1>
+    </header>
+
+    <section class="toolbar">
+      <div class="controls">
+        <input id="backendUrl" type="url" placeholder="Backend URL, e.g. https://your-service.onrender.com">
+        <input id="adminKey" type="password" placeholder="Admin API key">
+        <button id="loadUsers" type="button">Load</button>
+      </div>
+      <p id="message" class="message" aria-live="polite"></p>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><span>Users Shown</span><strong id="count">0</strong></div>
+      <div class="stat"><span>Fox Position</span><strong id="foxPosition">-</strong></div>
+      <div class="stat"><span>Database</span><strong id="database">-</strong></div>
+    </section>
+
+    <section id="users" class="users"></section>
+  </main>
+
+  <script>
+    const backendInput = document.getElementById("backendUrl");
+    const keyInput = document.getElementById("adminKey");
+    const loadButton = document.getElementById("loadUsers");
+    const messageEl = document.getElementById("message");
+    const usersEl = document.getElementById("users");
+    const countEl = document.getElementById("count");
+    const foxEl = document.getElementById("foxPosition");
+    const databaseEl = document.getElementById("database");
+
+    const savedBackend = window.localStorage.getItem("onebox:admin:backend") || "";
+    const savedKey = window.localStorage.getItem("onebox:admin:key") || "";
+
+    if (savedBackend) {
+      backendInput.value = savedBackend;
+    } else if (window.location.hostname.endsWith(".onrender.com")) {
+      backendInput.value = window.location.origin;
+    }
+
+    keyInput.value = savedKey;
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatDate(timestamp) {
+      const date = new Date(Number(timestamp || 0));
+      if (Number.isNaN(date.getTime())) {
+        return "Unknown";
+      }
+
+      return date.toLocaleString();
+    }
+
+    async function loadUsers() {
+      const backendUrl = backendInput.value.trim().replace(/\/+$/, "");
+      const adminKey = keyInput.value.trim();
+
+      messageEl.textContent = "";
+      usersEl.innerHTML = "";
+
+      if (!backendUrl || !adminKey) {
+        messageEl.textContent = "Enter backend URL and admin API key.";
+        return;
+      }
+
+      window.localStorage.setItem("onebox:admin:backend", backendUrl);
+      window.localStorage.setItem("onebox:admin:key", adminKey);
+
+      try {
+        const response = await fetch(
+          `${backendUrl}/admin/users?admin_key=${encodeURIComponent(adminKey)}`,
+          {
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          messageEl.textContent = `Admin request failed: ${response.status}`;
+          return;
+        }
+
+        const payload = await response.json();
+        countEl.textContent = payload.count || 0;
+        foxEl.textContent = payload.foxPosition || payload.hunterPosition || "-";
+        databaseEl.textContent = payload.database || "-";
+
+        usersEl.innerHTML = (payload.users || [])
+          .map(
+            (user, index) => `
+              <article class="user-row">
+                <div class="user-index">${index + 1}</div>
+                <div class="user-details">
+                  <strong>${escapeHtml(user.name)}</strong>
+                  <span>${escapeHtml(user.email)}</span>
+                  <small>ID: ${escapeHtml(user.id)}</small>
+                  <small>Created: ${escapeHtml(formatDate(user.createdAt))}</small>
+                </div>
+              </article>
+            `
+          )
+          .join("");
+
+        if (!usersEl.innerHTML) {
+          usersEl.innerHTML = `<p>No users found.</p>`;
+        }
+      } catch {
+        messageEl.textContent = "Unable to reach backend admin endpoint.";
+      }
+    }
+
+    loadButton.addEventListener("click", loadUsers);
+  </script>
+</body>
+</html>
